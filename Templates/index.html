@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PhishGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="particles">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
+<div class="container">
+    <h1>🛡️ PhishGuard</h1>
+    <p>Analyze a URL for phishing indicators</p>
+<div class="info-card">
+    <h3>🛡️ Security Dashboard</h3>
+    <p>
+        Analyze URLs for phishing indicators, SSL information,
+        and suspicious patterns.
+    </p>
+</div>
+
+    <form method="POST">
+        <input type="text" name="url" placeholder="Enter website URL" required>
+        <button type="submit">Analyze</button>
+
+       <div id="loader" style="display:none;">
+    <div class="spinner"></div>
+    <p>Analyzing URL...</p>
+</div>
+    </form>
+
+    
+       {% if result %}
+<div class="result">
+
+        <div class="meter-container">
+    <div
+        class="progress-ring"
+        style="
+        --score: {{ result.score }};
+        --color:
+        {% if result.score < 40 %}
+            #00ff88;
+        {% elif result.score < 70 %}
+            #ffd700;
+        {% else %}
+            #ff4d4d;
+        {% endif %}
+        "
+    >
+        <div class="progress-inner">
+            <span id="score-number">{{ result.score }}</span>%
+        </div>
+    </div>
+</div>
+    <h2 class="
+        {% if result.verdict == 'Likely Safe' %}
+            safe
+        {% elif result.verdict == 'Suspicious' %}
+            suspicious
+        {% else %}
+            danger
+        {% endif %}
+    ">
+        {{ result.verdict }}
+    </h2>
+
+    <h3>Risk Score: {{ result.score }}/100</h3>
+
+
+<div class="info-card">
+    <h3>🌐 Domain Information</h3>
+    <p><strong>Domain:</strong> {{ result.domain }}</p>
+    <p><strong>IP Address:</strong> {{ result.ip }}</p>
+</div>
+
+<div class="info-card">
+    <h3>🔒 SSL Information</h3>
+
+    <p>
+        <strong>Certificate Valid:</strong>
+        {% if result.ssl_valid %}
+            ✅ Yes
+        {% else %}
+            ❌ No
+        {% endif %}
+    </p>
+
+    <p><strong>Issued By:</strong> {{ result.ssl_issuer }}</p>
+    <p><strong>Expires On:</strong> {{ result.ssl_expiry }}</p>
+</div>
+
+    <ul>
+        {% for reason in result.reasons %}
+            <li>{{ reason }}</li>
+        {% endfor %}
+    </ul>
+<a href="/download?url={{ scanned_url }}&score={{ result.score }}&verdict={{ result.verdict }}&domain={{ result.domain }}&ip={{ result.ip }}">
+    <button type="button">📄 Download PDF Report</button>
+</a>
+
+</div>
+{% endif %}
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const scoreElement = document.getElementById("score-number");
+
+    if (scoreElement) {
+        let target = parseInt(scoreElement.innerText);
+        let current = 0;
+
+        scoreElement.innerText = "0";
+
+        const timer = setInterval(() => {
+            current++;
+
+            scoreElement.innerText = current;
+
+            if (current >= target) {
+                clearInterval(timer);
+            }
+        }, 20);
+    }
+});
+</script>
+
+<script>
+document.querySelector("form").addEventListener("submit", function () {
+    document.getElementById("loader").style.display = "block";
+});
+</script>
+
+<footer>
+    PhishGuard © 2026 | Built by Akshat
+</footer>
+
+<script>
+const title = document.querySelector("h1");
+const text = "🛡️ PhishGuard";
+
+title.innerHTML = "";
+
+let i = 0;
+function type() {
+    if (i < text.length) {
+        title.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(type, 100);
+    }
+}
+
+type();
+</script>
+
+</body>
+</html>
